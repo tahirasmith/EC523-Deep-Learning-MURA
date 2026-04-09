@@ -12,7 +12,7 @@ def train():
     # ------------------
     data_path = "./data/MURA-v1.1" ## come back and change this because i am swapping devices so path is diff
     batch_size = 32
-    num_epochs = 5
+    num_epochs = 20
     learning_rate = 1e-4
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
