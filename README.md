@@ -1,11 +1,11 @@
 Bone Abnormality Detection with Deep Learning
 Overview
 
-This project implements a deep learning pipeline for detecting abnormalities in musculoskeletal X-ray images using the MURA dataset. The goal is to train a convolutional neural network (CNN) to classify images as normal or abnormal, and to evaluate model performance using standard metrics and visualizations.
+This project implements a deep learning pipeline for detecting abnormalities in musculoskeletal X-ray images using the MURA dataset. The model classifies images as normal or abnormal using convolutional neural networks (CNNs).
 
-The project is structured to first establish a strong baseline model, with potential extensions including interpretability methods (e.g., Grad-CAM) and robustness analysis.
+The primary goal is to build a strong baseline model, with potential extensions including interpretability (e.g., Grad-CAM) and analysis under image perturbations.
 
-Project Structure
+Project Structure:
 project/
 │
 ├── data/                # MURA dataset (not included in repo)
@@ -18,56 +18,64 @@ project/
 │
 ├── requirements.txt
 └── README.md
+
 File Descriptions
 dataset.py
 Loads the MURA dataset from disk
 Assigns labels (normal = 0, abnormal = 1)
 Applies preprocessing (resize, normalization)
 Returns PyTorch DataLoaders for training and validation
+
 model.py
-Defines deep learning models (ResNet18, DenseNet121)
-Uses pretrained weights (ImageNet)
-Modifies final layer for binary classification
+Defines models (ResNet18, DenseNet121)
+Uses pretrained ImageNet weights
+Replaces final layer for binary classification
+
 train.py
 Trains the model on the training dataset
-Uses binary cross-entropy loss (BCEWithLogitsLoss)
+Uses BCEWithLogitsLoss for binary classification
 Evaluates on validation set after each epoch
-Prints loss and accuracy
+Prints loss and validation accuracy
+
 eval.py
 Loads a trained model
-Evaluates performance on validation set
+Evaluates on validation data
 Computes:
 Accuracy
 ROC-AUC
-Generates visualizations:
+Generates:
 ROC curve
 Confusion matrix
-Setup
+
+Setup:
+
 1. Install dependencies
 pip install -r requirements.txt
+
 2. Download the dataset
-
-Download the MURA dataset from Stanford and place it in:
-
+Download the MURA dataset and place it in:
 data/MURA-v1.1/
+Update the dataset path in train.py and eval.py if needed.
 
-Update the path in train.py and eval.py if needed.
-
-How to Run
+How to Run:
 Train the model
 python train.py
-
 This will:
-
 Train a CNN (default: ResNet18)
-Print training loss and validation accuracy
-Evaluate the model
+Output training loss and validation accuracy
+
+Evaluate the model:
 python eval.py
 
 This will:
-
 Load the trained model
 Print accuracy and ROC-AUC
 Display:
 ROC curve
 Confusion matrix
+
+
+
+
+
+
