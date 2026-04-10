@@ -6,18 +6,6 @@ This project implements a deep learning pipeline for detecting abnormalities in 
 
 A pretrained convolutional neural network (ResNet18) is fine-tuned on a subset of the dataset to establish a baseline model. The project is designed to be extensible, with planned additions including interpretability methods (Grad-CAM), robustness analysis, and model comparisons.
 
-## Project Structure
-
-EC523-Deep-Learning-MURA/
-├── MURA-v1.1/              # Dataset (not included in repo, way too large)
-│   ├── train/
-│   └── valid/
-├── dataset.py              # Data loading and preprocessing
-├── model.py                # Model definition (ResNet18)
-├── train.py                # Training pipeline
-├── eval.py                 # Evaluation + visualization
-├── model.pth               # Saved model (generated after training)
-└── README.md
 
 ## Dataset
 
