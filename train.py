@@ -1,78 +1,65 @@
-#!/usr/bin/env python
-"""
-train.py – train a separate DQN for every available board layout
-           ("classic", "empty", "spiral", "spiral_harder").
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
-Saved weight files:
-    pacman_dqn_<layout>.pt
-"""
+from dataset import get_dataloaders
+from model import get_model
 
-from __future__ import annotations
-import argparse, torch, torch.optim as optim
-from pathlib import Path
-from pacman_env import PacmanEnv
-from dqn_agent import DQN, ReplayMemory, select_action, optimise, DEVICE
 
-# ───────── hyper‑parameters ─────────
-NUM_EPISODES      = 1000
-NUM_EPISODES_FAST = 200
-TARGET_FREQ       = 200
-BATCH_SIZE        = 128
-MEMORY_CAP        = 20_000
-GAMMA             = 0.99
-LR                = 1e-3
-EPS               = (1.0, 0.05, 8_000)   # ε‑greedy schedule (start, end, decay)
+def train():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ───────── single‑layout trainer ─────────
-def train_layout(layout: str, episodes: int) -> Path:
-    env = PacmanEnv(layout)
-    obs_shape = env.observation_space.shape        # (H, W, C)
-    n_actions = env.action_space.n
-    print("Created environment")
-    policy  = DQN(obs_shape, n_actions).to(DEVICE)
-    target  = DQN(obs_shape, n_actions).to(DEVICE)
-    target.load_state_dict(policy.state_dict())
-    print("Created policy and target networks")
-    optimiser = optim.Adam(policy.parameters(), lr=LR)
-    memory    = ReplayMemory(MEMORY_CAP)
-    print("Created optimizer and memory")
-    step = 0
-    for ep in range(1, episodes + 1):
-        state, _ = env.reset()
-        done, ep_reward = False, 0.0
-        print(f"[{layout}, episode {ep}].")
-        while not done:
-            action = select_action(state, policy, step, *EPS)
-            step += 1
+    train_loader, val_loader = get_dataloaders(batch_size = 4, max_samples=5000)
 
-            next_state, reward, done, _, _ = env.step(action)
-            memory.push(state, action, reward, next_state, float(done))
-            state = next_state
-            ep_reward += reward
+    model = get_model().to(device)
 
-            optimise(memory, policy, target, optimiser, BATCH_SIZE, GAMMA)
-            if step % TARGET_FREQ == 0:
-                target.load_state_dict(policy.state_dict())
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=5e-5)
 
-        if ep % 100 == 0 or ep == episodes:
-            print(f"[{layout}] Episode {ep:4d} | reward = {ep_reward:6.1f}")
+    epochs = 20
 
-    env.close()
-    weight_path = Path(f"pacman_dqn_{layout}.pt")
-    torch.save(policy.state_dict(), weight_path)
-    print(f"[{layout}] training finished → {weight_path.resolve()}")
-    return weight_path
+    for epoch in range(epochs):
+        model.train()
+        total_loss = 0
 
-# ───────── CLI ─────────
+        for images, labels in train_loader:
+            images = images.to(device)
+            labels = labels.float().unsqueeze(1).to(device)
+
+            optimizer.zero_grad()
+
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        avg_loss = total_loss / len(train_loader)
+
+        # Validation
+        model.eval()
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = model(images)
+                preds = (torch.sigmoid(outputs) > 0.5).cpu()
+
+                correct += (preds.squeeze() == labels).sum().item()
+                total += labels.size(0)
+
+        acc = correct / total
+        print(f"Epoch {epoch+1}: Loss={avg_loss:.4f}, Val Acc={acc:.4f}")
+
+    torch.save(model.state_dict(), "model.pth")
+    print("Model saved to model.pth")
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train DQN on all Pac‑Man layouts")
-    parser.add_argument(
-        "--fast", action="store_true",
-        help="quick 200‑episode run per layout instead of full 4000"
-    )
-    args = parser.parse_args()
-    episodes = NUM_EPISODES_FAST if args.fast else NUM_EPISODES
-
-    for layout in ("spiral_harder"):
-#    for layout in ("classic", "spiral", "spiral_harder", "empty"):        
-        train_layout(layout, episodes)
+    train()
