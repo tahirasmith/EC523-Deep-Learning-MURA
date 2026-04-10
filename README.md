@@ -15,9 +15,6 @@ This project uses the MURA (Musculoskeletal Radiographs) dataset.
 - 7 body parts (wrist, elbow, shoulder, etc.)  
 - Labels: normal (0) or abnormal (1)
 
-The dataset should be placed in:
-
-MURA-v1.1/
 
 ## Setup
 
