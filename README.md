@@ -26,6 +26,7 @@ conda activate mura_env
 pip install torch torchvision numpy matplotlib scikit-learn pillow
 
 ## How to Run
+coming soon...
 
 ### Train the model
 python train.py
