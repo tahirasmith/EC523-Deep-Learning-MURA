@@ -1,0 +1,4 @@
+MURA-v1.1/
+*.pth
+__pycache__/
+.DS_Store
