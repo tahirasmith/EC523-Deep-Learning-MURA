@@ -8,9 +8,9 @@ from model_densenet import get_model
 from dataset import get_dataloaders
 
 
-# -------------------------
+
 # Grad-CAM implementation
-# -------------------------
+
 class GradCAM:
     def __init__(self, model, target_layer):
         self.model = model
@@ -19,7 +19,6 @@ class GradCAM:
         self.gradients = None
         self.activations = None
 
-        # hooks
         self.target_layer.register_forward_hook(self.forward_hook)
         self.target_layer.register_full_backward_hook(self.backward_hook)
 
@@ -32,7 +31,6 @@ class GradCAM:
     def generate(self, x):
         self.model.zero_grad()
 
-        # IMPORTANT: keep graph for Grad-CAM
         x = x.requires_grad_(True)
 
         output = self.model(x)
@@ -52,9 +50,9 @@ class GradCAM:
         return cam.detach().cpu().numpy(), output
 
 
-# -------------------------
-# Image utilities
-# -------------------------
+
+# image utilities
+
 def denormalize(img):
     img = img.permute(1, 2, 0).cpu().numpy()
     img = np.clip(img, 0, 1)
@@ -91,9 +89,9 @@ def save_fig(original, cam, overlay, idx, out_dir):
     plt.close()
 
 
-# -------------------------
-# Main evaluation
-# -------------------------
+
+# main eval
+
 def run(num_samples=20):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -104,7 +102,7 @@ def run(num_samples=20):
 
     model.eval()
 
-    # FIX: disable inplace ReLU (prevents Grad-CAM crash)
+    # tried relu, had a gradcam crash due to vanishing grad
     for module in model.modules():
         if isinstance(module, torch.nn.ReLU):
             module.inplace = False
