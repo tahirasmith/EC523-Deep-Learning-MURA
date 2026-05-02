@@ -86,12 +86,12 @@ def overlay(image, cam):
 if __name__ == "__main__":
     model = load_model("densenet_best.pth")
 
-    # IMPORTANT: correct DenseNet layer
     target_layer = model.features.denseblock4
 
     gradcam = GradCAM(model, target_layer)
-
-    image_path = "MURA-v1.1/train/XR_FOREARM/patient09148/study1_positive/image1.png"
+    
+    ## get path of png orig image and and add here for diff images
+    image_path = "MURA-v1.1/train/XR_FOREARM/patient09148/study1_positive/image1.png" 
 
     image, tensor = preprocess(image_path)
     image.save("original.png")
