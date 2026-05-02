@@ -9,9 +9,8 @@ import torchvision.transforms as transforms
 from model_densenet import get_model
 
 
-# -------------------------
-# Grad-CAM
-# -------------------------
+# grad-cAM
+
 class GradCAM:
     def __init__(self, model, target_layer):
         self.model = model
@@ -32,7 +31,6 @@ class GradCAM:
     def generate(self, x):
         self.model.zero_grad()
 
-        # CRITICAL FIX: avoid view/in-place conflict
         x = x.clone()
 
         output = self.model(x)
@@ -55,9 +53,7 @@ class GradCAM:
         return cam
 
 
-# -------------------------
-# Overlay
-# -------------------------
+
 def overlay(image, cam):
     heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
     heatmap = np.float32(heatmap) / 255
@@ -70,9 +66,7 @@ def overlay(image, cam):
     return np.uint8(255 * result)
 
 
-# -------------------------
-# Main
-# -------------------------
+# main
 def run():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -81,7 +75,6 @@ def run():
     model.to(device)
     model.eval()
 
-    # 🔥 CRITICAL FIX: disable in-place ReLU everywhere
     for module in model.modules():
         if isinstance(module, nn.ReLU):
             module.inplace = False
@@ -127,7 +120,7 @@ def run():
 
             count += 1
 
-    print(f"Saved {count} Grad-CAM images to ./gradcam_outputs/")
+    print(f"Saved {count} grad cam images to ./gradcam_outputs/")
 
 
 if __name__ == "__main__":
