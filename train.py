@@ -13,9 +13,8 @@ def train():
 
     model = get_model().to(device)
 
-    # --------------------------
     # Compute class imbalance
-    # --------------------------
+    
     pos = 0
     neg = 0
 
@@ -26,9 +25,8 @@ def train():
 
     print(f"Train positives: {pos}, negatives: {neg}")
 
-    # --------------------------
     # Weighted loss
-    # --------------------------
+    
     pos_weight = torch.tensor([neg / pos], dtype=torch.float).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
