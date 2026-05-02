@@ -62,7 +62,7 @@ if __name__ == "__main__":
     root = "MURA-v1.1/train"
     data = collect_by_bodypart(root)
 
-    print("\n=== PER BODY PART ROC-AUC ===")
+    print("\n-- roc-auc per body part --")
 
     for bp, samples in data.items():
         if len(samples) < 50:
