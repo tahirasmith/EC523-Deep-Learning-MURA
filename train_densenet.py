@@ -31,7 +31,7 @@ def train():
 
     print(f"Train positives: {pos}, negatives: {neg}")
 
-    pos_weight = torch.tensor([neg / pos], dtype=torch.float).to(device)
+    pos_weight = torch.tensor([neg / pos], dtype=torch.float).to(device) # hoping this makes up for class imbalance of pos to negative
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     optimizer = optim.Adam(model.parameters(), lr=1e-5)
@@ -60,7 +60,7 @@ def train():
 
         avg_loss = total_loss / len(train_loader)
 
-        # valid
+        # validation
         model.eval()
         correct = 0
         total = 0
@@ -80,7 +80,7 @@ def train():
 
         print(f"Epoch {epoch+1}: Loss={avg_loss:.4f}, Val Acc={val_acc:.4f}")
 
-        # Save best model
+        # save best model, see at what epoch does model stop learning. use this to add early stopping if necessary
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             torch.save(model.state_dict(), "densenet_best.pth")
