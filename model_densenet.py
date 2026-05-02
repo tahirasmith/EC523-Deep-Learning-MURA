@@ -9,7 +9,6 @@ def get_model():
     # replace classifier for binary task
     model.classifier = nn.Linear(model.classifier.in_features, 1)
 
-    # IMPORTANT: disable in-place ops for Grad-CAM stability
     for module in model.modules():
         if isinstance(module, nn.ReLU):
             module.inplace = False
