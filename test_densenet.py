@@ -39,7 +39,7 @@ def test():
 
     # Metrics
     auc = roc_auc_score(all_labels, all_probs)
-    preds = [1 if p > 0.5 else 0 for p in all_probs]  # use your better threshold
+    preds = [1 if p > 0.5 else 0 for p in all_probs]  # change threshold depending on classification results, .4, .6, .3?
 
     cm = confusion_matrix(all_labels, preds)
 
