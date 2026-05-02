@@ -18,9 +18,7 @@ class MURADataset(Dataset):
             transforms.ToTensor()
         ])
 
-        # --------------------------
-        # Collect samples
-        # --------------------------
+        # get samples
         for root, _, files in os.walk(self.root_dir):
             for f in files:
                 if f.endswith(".png"):
@@ -38,9 +36,6 @@ class MURADataset(Dataset):
 
                     self.samples.append((path, label, body_part))
 
-        # --------------------------
-        # IMPORTANT FIX: avoid ordering bias
-        # --------------------------
         random.shuffle(self.samples)
 
         # limit samples if needed (for compute constraints)
@@ -59,9 +54,6 @@ class MURADataset(Dataset):
         return image, label, body_part
 
 
-# --------------------------
-# Dataloaders
-# --------------------------
 def get_dataloaders(root_dir="MURA-v1.1", batch_size=4, max_samples=None):
     train_dataset = MURADataset(root_dir, split="train", max_samples=max_samples)
     val_dataset = MURADataset(root_dir, split="valid", max_samples=max_samples)

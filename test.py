@@ -56,9 +56,7 @@ def test(model_path="densenet_best.pth", threshold=0.5):
                 elif label == 1 and pred == 0:
                     false_neg.append((images[i].cpu(), label, pred, prob))
 
-    # -------------------------
-    # GLOBAL METRICS
-    # -------------------------
+    # metrics
     roc_auc = roc_auc_score(all_labels, all_probs)
     preds_binary = (np.array(all_probs) > threshold).astype(int)
 
@@ -73,17 +71,14 @@ def test(model_path="densenet_best.pth", threshold=0.5):
     print(f"\nFalse Positives: {len(false_pos)}")
     print(f"False Negatives: {len(false_neg)}")
 
-    # -------------------------
-    # PER-BODY-PART KAPPA
-    # -------------------------
-    print("\n=== PER BODY PART COHEN'S KAPPA ===")
+    # cohens kappa per body part
+    print("\n -- cohens kappa per body part --")
     for bp in bp_true:
         bp_kappa = cohen_kappa_score(bp_true[bp], bp_pred[bp])
         print(f"{bp}: Kappa={bp_kappa:.4f} | samples={len(bp_true[bp])}")
 
-    # -------------------------
-    # SAVE MISCLASSIFIED EXAMPLES
-    # -------------------------
+    # examples misclassified save
+
     random.shuffle(false_pos)
     random.shuffle(false_neg)
 
