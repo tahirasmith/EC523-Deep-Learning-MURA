@@ -1,4 +1,5 @@
 import os
+import random
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
@@ -17,7 +18,9 @@ class MURADataset(Dataset):
             transforms.ToTensor()
         ])
 
-        # Collect all samples
+        # --------------------------
+        # Collect samples
+        # --------------------------
         for root, _, files in os.walk(self.root_dir):
             for f in files:
                 if f.endswith(".png"):
@@ -30,9 +33,17 @@ class MURADataset(Dataset):
                     else:
                         continue
 
-                    self.samples.append((path, label))
+                    # extract body part (XR_HAND, XR_WRIST, etc.)
+                    body_part = path.split(os.sep)[-4]
 
-        # adding this because computer overheats
+                    self.samples.append((path, label, body_part))
+
+        # --------------------------
+        # IMPORTANT FIX: avoid ordering bias
+        # --------------------------
+        random.shuffle(self.samples)
+
+        # limit samples if needed (for compute constraints)
         if max_samples is not None:
             self.samples = self.samples[:max_samples]
 
@@ -40,12 +51,17 @@ class MURADataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        path, label = self.samples[idx]
+        path, label, body_part = self.samples[idx]
+
         image = Image.open(path).convert("RGB")
         image = self.transform(image)
-        return image, label
+
+        return image, label, body_part
 
 
+# --------------------------
+# Dataloaders
+# --------------------------
 def get_dataloaders(root_dir="MURA-v1.1", batch_size=4, max_samples=None):
     train_dataset = MURADataset(root_dir, split="train", max_samples=max_samples)
     val_dataset = MURADataset(root_dir, split="valid", max_samples=max_samples)
